@@ -53,6 +53,31 @@ async function annunciPubblicati(env: Record<string, string>) {
   }
 }
 
+/** PWA del gestionale: installabile su telefono e tablet con il nome e il colore del cliente */
+function manifestGestionale() {
+  return JSON.stringify({
+    name: cliente.gestionale.titolo,
+    short_name: cliente.azienda.nome,
+    start_url: '/',
+    scope: '/',
+    display: 'standalone',
+    background_color: '#0B0C0E',
+    theme_color: cliente.brand.colori.primario,
+    lang: cliente.sito.lingua,
+    icons: [
+      { src: '/icon-192.png', sizes: '192x192', type: 'image/png' },
+      { src: '/icon-512.png', sizes: '512x512', type: 'image/png' },
+      { src: '/icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+    ],
+  })
+}
+
+/** Service worker minimo: serve a rendere l'app installabile. Le chiamate ai dati non vengono mai messe in cache. */
+const SERVICE_WORKER = `self.addEventListener('install', () => self.skipWaiting())
+self.addEventListener('activate', (e) => e.waitUntil(self.clients.claim()))
+self.addEventListener('fetch', () => {})
+`
+
 export function clientePlugin(sito?: OpzioniSito): Plugin {
   let env: Record<string, string> = {}
   return {
@@ -83,10 +108,14 @@ export function clientePlugin(sito?: OpzioniSito): Plugin {
         .replace(/%CLIENTE_LINGUA%/g, cliente.sito.lingua)
         .replace(/%GESTIONALE_TITOLO%/g, cliente.gestionale.titolo)
         .replace('<!--cliente:seo-->', sito ? headSito(cliente, sito.faq) : '')
-        .replace('</head>', `    ${vars}\n  </head>`)
+        .replace('</head>', `${sito ? '' : `    <link rel="manifest" href="/manifest.webmanifest" />\n    <meta name="theme-color" content="${colori.primario}" />\n    <meta name="apple-mobile-web-app-capable" content="yes" />\n    <meta name="apple-mobile-web-app-title" content="${cliente.azienda.nome}" />\n`}    ${vars}\n  </head>`)
     },
 
     configureServer(server) {
+      if (!sito) server.middlewares.use('/manifest.webmanifest', (_req, res) => {
+        res.setHeader('Content-Type', 'application/manifest+json')
+        res.end(manifestGestionale())
+      })
       server.middlewares.use('/brand', (req, res, next) => {
         const file = path.join(BRAND_DIR, decodeURIComponent((req.url || '').split('?')[0]))
         if (!file.startsWith(BRAND_DIR) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) return next()
@@ -96,6 +125,10 @@ export function clientePlugin(sito?: OpzioniSito): Plugin {
     },
 
     async generateBundle() {
+      if (!sito) {
+        this.emitFile({ type: 'asset', fileName: 'manifest.webmanifest', source: manifestGestionale() })
+        this.emitFile({ type: 'asset', fileName: 'sw.js', source: SERVICE_WORKER })
+      }
       if (sito) {
         this.emitFile({ type: 'asset', fileName: 'robots.txt', source: robotsTxt(cliente) })
         if (!cliente.demo) {
