@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
-import { MessageSquare, Car, RefreshCw, Phone, Mail, Inbox } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { MessageSquare, Car, RefreshCw, Phone, Mail, Inbox, Handshake } from 'lucide-react'
 import { Layout } from '../components/Layout'
 import { Pillole, StatTile } from '../components/Grafici'
 import { supabase } from '../lib/supabaseClient'
 import { useUtente, nomeCompleto } from '../lib/utente'
+import { traGiorni } from '../lib/crm'
 
 type Stato = 'nuova' | 'contattato' | 'test_drive' | 'trattativa' | 'venduto' | 'perso'
 
@@ -70,6 +72,8 @@ export function Richieste() {
   const [filtroStato, setFiltroStato] = useState<'aperte' | 'tutte' | Stato>('aperte')
   const [filtroComm, setFiltroComm] = useState('')
   const [filtroTipo, setFiltroTipo] = useState('')
+  const navigate = useNavigate()
+  const [conTrattativa, setConTrattativa] = useState<Record<string, string>>({})
 
   async function carica() {
     const { data } = await supabase.from('richieste_sito').select('*').order('creato_il', { ascending: false })
@@ -77,7 +81,36 @@ export function Richieste() {
   }
   useEffect(() => {
     carica()
+    supabase
+      .from('trattative')
+      .select('id, richiesta_id')
+      .not('richiesta_id', 'is', null)
+      .then(({ data }) => setConTrattativa(Object.fromEntries(((data as { id: string; richiesta_id: string }[]) ?? []).map((x) => [x.richiesta_id, x.id]))))
   }, [])
+
+  async function apriTrattativa(r: Richiesta) {
+    const esistente = conTrattativa[r.id]
+    if (esistente) return navigate(`/trattative?apri=${esistente}`)
+    const d = r.dati as Record<string, unknown>
+    const auto = String(d.auto_interesse ?? d.auto ?? d.marcaModello ?? '')
+    const { data } = await supabase
+      .from('trattative')
+      .insert({
+        nome: r.nome,
+        telefono: r.telefono,
+        email: r.email,
+        auto_interesse: auto || null,
+        fonte: 'Sito web',
+        stato: r.stato === 'nuova' ? 'nuovo' : 'contattato',
+        prossima_azione: 'Contattare il cliente',
+        richiamo_il: traGiorni(0),
+        commerciale_id: r.commerciale_id ?? commercialeAttivo?.id ?? null,
+        richiesta_id: r.id,
+      })
+      .select('id')
+      .single()
+    if (data) navigate(`/trattative?apri=${(data as { id: string }).id}`)
+  }
 
   async function aggiorna(id: string, campi: Partial<Richiesta>) {
     setRighe((r) => r?.map((x) => (x.id === id ? { ...x, ...campi } : x)) ?? null)
@@ -210,6 +243,9 @@ export function Richieste() {
                         <option key={s.v} value={s.v}>{s.l}</option>
                       ))}
                     </select>
+                    <button className="btn-secondary !py-2 !text-xs" onClick={() => apriTrattativa(r)}>
+                      <Handshake className="h-3.5 w-3.5" /> {conTrattativa[r.id] ? 'Vedi trattativa' : 'Apri trattativa'}
+                    </button>
                     {isTitolare ? (
                       <select
                         className="field !py-2 !text-xs"

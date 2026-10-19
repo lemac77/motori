@@ -12,6 +12,7 @@ import { Impostazioni } from './pages/Impostazioni'
 import { Vendite } from './pages/Vendite'
 import { Richieste } from './pages/Richieste'
 import { Scadenze } from './pages/Scadenze'
+import { Trattative } from './pages/Trattative'
 import { UtenteProvider } from './lib/utente'
 
 function RequireAuth({ session, children }: { session: Session | null; children: React.ReactNode }) {
@@ -111,6 +112,14 @@ export default function App() {
           element={
             <RequireAuth session={session}>
               <Richieste />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/trattative"
+          element={
+            <RequireAuth session={session}>
+              <Trattative />
             </RequireAuth>
           }
         />

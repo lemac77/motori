@@ -11,6 +11,7 @@ const VOCI = [
   { to: '/', label: 'Annunci', match: (p: string) => p === '/' || p.startsWith('/nuovo') || p.startsWith('/modifica') },
   { to: '/vendite', label: 'Vendite', match: (p: string) => p.startsWith('/vendite') },
   { to: '/richieste', label: 'Richieste', match: (p: string) => p.startsWith('/richieste') },
+  { to: '/trattative', label: 'Trattative', match: (p: string) => p.startsWith('/trattative') },
   { to: '/scadenze', label: 'Scadenze', match: (p: string) => p.startsWith('/scadenze') },
   { to: '/documenti', label: 'Documenti', match: (p: string) => p.startsWith('/documenti') || p.startsWith('/archivio') },
 ]
@@ -21,11 +22,23 @@ export function Layout({ children, largo = false }: { children: ReactNode; largo
   const [tema, toggleTema] = useTema()
   const { ruoloReale, commerciali, vistaCome, setVistaCome, commercialeAttivo } = useUtente()
   const [richiesteNuove, setRichiesteNuove] = useState(0)
+  const [richiami, setRichiami] = useState(0)
 
   useEffect(() => {
     let q = supabase.from('richieste_sito').select('id', { count: 'exact', head: true }).eq('stato', 'nuova')
     if (commercialeAttivo) q = q.or(`commerciale_id.is.null,commerciale_id.eq.${commercialeAttivo.id}`)
     q.then(({ count }) => setRichiesteNuove(count ?? 0))
+
+    // Richiami scaduti o di oggi nelle trattative aperte
+    const d = new Date()
+    const oggi = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+    let t = supabase
+      .from('trattative')
+      .select('id', { count: 'exact', head: true })
+      .lte('richiamo_il', oggi)
+      .not('stato', 'in', '(venduto,perso)')
+    if (commercialeAttivo) t = t.or(`commerciale_id.is.null,commerciale_id.eq.${commercialeAttivo.id}`)
+    t.then(({ count }) => setRichiami(count ?? 0))
   }, [location.pathname, commercialeAttivo])
 
   async function handleLogout() {
@@ -45,6 +58,9 @@ export function Layout({ children, largo = false }: { children: ReactNode; largo
         }`}
       >
         {v.label}
+        {v.to === '/trattative' && richiami > 0 && (
+          <span className={`ml-1.5 rounded-full px-1.5 py-0.5 text-[10px] ${attiva ? 'bg-white/25' : 'bg-brand text-white'}`}>{richiami}</span>
+        )}
         {v.to === '/richieste' && richiesteNuove > 0 && (
           <span className={`ml-1.5 rounded-full px-1.5 py-0.5 text-[10px] ${attiva ? 'bg-white/25' : 'bg-brand text-white'}`}>{richiesteNuove}</span>
         )}
