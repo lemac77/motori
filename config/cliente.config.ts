@@ -11,10 +11,10 @@ export const cliente: ClienteConfig = {
   demoInfo: {
     urlSito: 'https://motori-sito.vercel.app',
     urlGestionale: 'https://motori-gestionale.vercel.app',
+    // URL della landing GestAuto: dal login il link "Richiedile qui" porta al form demo
     urlLanding: '',
-    // Utente da creare in Supabase > Authentication > Users
-    loginEmail: 'demo@bericamotori.it',
-    loginPassword: 'BericaDemo2026',
+    // Le credenziali dell'utente demo NON vanno messe qui: questo file finisce nel
+    // JavaScript pubblico. Vivono solo in Supabase e nelle variabili della landing.
   },
 
   azienda: {

@@ -7,9 +7,9 @@ import { cliente } from '@cliente/cliente.config'
 import { DemoBar } from '../components/DemoBar'
 
 export function Login() {
-  // In demo il login è precompilato con l'utente di prova
-  const [email, setEmail] = useState(cliente.demo ? cliente.demoInfo?.loginEmail ?? '' : '')
-  const [password, setPassword] = useState(cliente.demo ? cliente.demoInfo?.loginPassword ?? '' : '')
+  // Le credenziali demo non sono nel codice: arrivano via email dalla landing.
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
@@ -47,9 +47,17 @@ export function Login() {
         <div className="mb-8 flex flex-col items-center text-center">
           <img src={`/brand/${tema === 'dark' ? cliente.brand.logo.chiaro : cliente.brand.logo.scuro}`} alt={cliente.azienda.nome} className="mb-5 h-14 w-auto" />
           <p className="text-sm text-neutral-500">Accedi al pannello gestione annunci</p>
-          {cliente.demo && cliente.demoInfo?.loginEmail && (
+          {cliente.demo && (
             <p className="mt-3 rounded-lg border border-neutral-200 bg-neutral-50 px-3 py-2 text-xs text-neutral-600">
-              Credenziali demo già inserite: premi <strong>Accedi</strong>
+              Usa le credenziali demo che hai ricevuto via email.
+              {cliente.demoInfo?.urlLanding && (
+                <>
+                  {' '}Non le hai?{' '}
+                  <a href={`${cliente.demoInfo.urlLanding}#demo`} className="font-semibold underline">
+                    Richiedile qui
+                  </a>
+                </>
+              )}
             </p>
           )}
         </div>

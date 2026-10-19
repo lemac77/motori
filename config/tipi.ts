@@ -31,13 +31,11 @@ export interface FasciaOraria {
 export interface ClienteConfig {
   /** Modalità demo: barra "sito dimostrativo", noindex, form finti, niente tracking */
   demo: boolean
-  /** Solo in demo: link incrociati e credenziali mostrate nel login del gestionale */
+  /** Solo in demo: link incrociati tra sito, gestionale e landing (mai credenziali: finiscono nel JS pubblico) */
   demoInfo?: {
     urlSito?: string
     urlGestionale?: string
     urlLanding?: string
-    loginEmail?: string
-    loginPassword?: string
   }
 
   azienda: {

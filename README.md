@@ -18,7 +18,7 @@ Ogni app vuole il suo `.env` con `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY` 
 ## Demo Berica Motori (stato attuale del config)
 
 1. **Supabase**: SQL Editor → incolla `gestionale/sql/demo-setup.sql` → Run (tabelle, permessi, bucket, auto demo, reset notturno alle 03:00 UTC).
-   Poi Authentication → Users → Add user: `demo@bericamotori.it` / `BericaDemo2026` (spunta "Auto confirm"). Consigliato: Authentication → Sign In / Providers → disattiva "Allow new users to sign up".
+   Poi Authentication → Users → Add user: `demo@bericamotori.it` con una password robusta (spunta "Auto confirm"). Non scrivere la password nel repo: la landing GestAuto la manda via email a chi richiede la demo (variabile `DEMO_PASSWORD` su Vercel). Consigliato: Authentication → Sign In / Providers → disattiva "Allow new users to sign up".
 2. **Vercel**: due progetti dallo stesso repo, Root Directory `sito` e `gestionale`, framework Vite. Le chiavi Supabase (pubbliche) sono già in `.env.production`.
 3. Quando hai gli URL, compila `demoInfo.urlSito` / `urlGestionale` in `config/cliente.config.ts` e fai push: compaiono i link incrociati nelle barre demo.
 
