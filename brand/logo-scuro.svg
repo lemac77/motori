@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 140" width="480" height="140">
+  <rect x="0" y="30" width="80" height="80" rx="18" fill="#e8612c"/>
+  <text x="40" y="88" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-weight="900" font-size="52" fill="#ffffff">B</text>
+  <text x="100" y="78" font-family="Inter, Arial, sans-serif" font-weight="900" font-size="44" letter-spacing="2" fill="#111111">BERICA</text>
+  <text x="102" y="108" font-family="Inter, Arial, sans-serif" font-weight="500" font-size="20" letter-spacing="9" fill="#e8612c">MOTORI</text>
+</svg>

@@ -1,0 +1,11 @@
+{
+  "name": "autosalone-template",
+  "private": true,
+  "description": "Sito vetrina + gestionale per autosaloni, configurabile da config/cliente.config.ts",
+  "scripts": {
+    "install:all": "npm --prefix sito install && npm --prefix gestionale install",
+    "dev:sito": "npm --prefix sito run dev",
+    "dev:gestionale": "npm --prefix gestionale run dev",
+    "build": "npm --prefix sito run build && npm --prefix gestionale run build"
+  }
+}

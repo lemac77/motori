@@ -1,0 +1,22 @@
+# Configurazione Single Page Application (React) per hosting Apache/cPanel (es. Aruba)
+# Necessario per URL puliti tipo /parco-auto/{id} invece di /#/parco-auto/{id}
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Se la richiesta corrisponde a un file reale esistente (es. un'immagine, un file JS/CSS),
+  # servilo normalmente, senza reindirizzare.
+  RewriteCond %{REQUEST_FILENAME} -f
+  RewriteRule ^ - [L]
+
+  # Stessa cosa se corrisponde a una cartella reale esistente.
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # Per tutto il resto (le "pagine finte" gestite da React, tipo /parco-auto/123),
+  # manda sempre a index.html: è React dentro il browser a capire quale pagina mostrare.
+  RewriteRule ^ index.html [L]
+</IfModule>
+
+# Evita che Aruba mostri le sue pagine di errore personalizzate al posto di quelle gestite dal sito
+ErrorDocument 404 /index.html

@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+.DS_Store
+*.log
+graphify-out/
+
+# La anon key Supabase è pubblica per natura (finisce comunque nel bundle, la sicurezza la fa la RLS):
+# la teniamo nel repo così Vercel funziona senza configurare variabili.
+!.env.production
