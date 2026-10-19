@@ -19,11 +19,6 @@ interface InvioRichiesta {
  * Supabase, non si perde nulla).
  */
 export async function inviaRichiesta({ tipo, nome, email, telefono, dati }: InvioRichiesta): Promise<void> {
-  // Demo: il form funziona e mostra la conferma, ma non salva né invia nulla
-  if (cliente.demo) {
-    await new Promise((r) => setTimeout(r, 700));
-    return;
-  }
   const { error } = await supabase.from('richieste_sito').insert({
     tipo,
     nome,
@@ -32,6 +27,9 @@ export async function inviaRichiesta({ tipo, nome, email, telefono, dati }: Invi
     dati: dati || {},
   });
   if (error) throw error;
+
+  // Demo: la richiesta compare nel gestionale demo (pagina Richieste), nessuna email
+  if (cliente.demo) return;
 
   try {
     await supabase.functions.invoke('invia-richiesta', {

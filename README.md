@@ -23,3 +23,14 @@ Ogni app vuole il suo `.env` con `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY` 
 3. Quando hai gli URL, compila `demoInfo.urlSito` / `urlGestionale` in `config/cliente.config.ts` e fai push: compaiono i link incrociati nelle barre demo.
 
 Nuovo cliente vero: `demo: false`, compila `config/cliente.config.ts`, sostituisci i file in `brand/`, le foto in `sito/src/assets/images/` e le favicon in `*/public/`.
+
+## Gestionale: vendite, team, richieste, scadenze
+
+- **Vendite** (`/vendite`): KPI, andamento mensile, cosa si vende (marca, modello, alimentazione, carrozzeria, fascia prezzo/km), per commerciale, zone (province e comuni), canali, stock fermo, ultime vendite.
+- **Registra vendita**: passando un annuncio a "Venduto" si apre la scheda (data, prezzo reale, commerciale, canale, cliente, garanzia aggiuntiva).
+- **Team** (Impostazioni): titolare e commerciali. Chi accede con l'email di un commerciale vede solo le sue vendite e richieste, senza prezzi di acquisto e margini. Il titolare può usare "Vista come" per vedere il gestionale con i permessi di un commerciale.
+- **Richieste** (`/richieste`): mini CRM delle richieste arrivate dai form del sito, con stato, assegnazione e note.
+- **Scadenze** (`/scadenze`): revisioni e bolli delle auto in stock, clienti a 12 mesi dalla consegna (tagliando + estensione garanzia), garanzie estese in scadenza.
+
+Database: `gestionale/sql/007_analitiche.sql` (migrazione). Per la demo già installata: `gestionale/sql/demo-update-007.sql`.
+Nota: i permessi per ruolo sono applicati nell'interfaccia; per un cliente con più commerciali reali vanno blindati anche con policy RLS.

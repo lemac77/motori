@@ -9,6 +9,10 @@ import { DocumentiVendita } from './pages/DocumentiVendita'
 import { DocumentiHome } from './pages/DocumentiHome'
 import { ArchivioGenerale } from './pages/ArchivioGenerale'
 import { Impostazioni } from './pages/Impostazioni'
+import { Vendite } from './pages/Vendite'
+import { Richieste } from './pages/Richieste'
+import { Scadenze } from './pages/Scadenze'
+import { UtenteProvider } from './lib/utente'
 
 function RequireAuth({ session, children }: { session: Session | null; children: React.ReactNode }) {
   if (!session) return <Navigate to="/login" replace />
@@ -42,6 +46,8 @@ export default function App() {
 
   return (
     <BrowserRouter>
+      {/* Ruolo e team caricati una volta per utente (cambia utente = ricarica) */}
+      <UtenteProvider key={session?.user.id ?? 'ospite'}>
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route
@@ -93,6 +99,30 @@ export default function App() {
           }
         />
         <Route
+          path="/vendite"
+          element={
+            <RequireAuth session={session}>
+              <Vendite />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/richieste"
+          element={
+            <RequireAuth session={session}>
+              <Richieste />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/scadenze"
+          element={
+            <RequireAuth session={session}>
+              <Scadenze />
+            </RequireAuth>
+          }
+        />
+        <Route
           path="/impostazioni"
           element={
             <RequireAuth session={session}>
@@ -101,6 +131,7 @@ export default function App() {
           }
         />
       </Routes>
+      </UtenteProvider>
     </BrowserRouter>
   )
 }

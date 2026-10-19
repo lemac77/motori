@@ -6,6 +6,7 @@ import { PhotoUploader } from '../components/PhotoUploader'
 import { Layout } from '../components/Layout'
 import { MARCHE, MARCA_NON_IN_LISTA } from '../lib/marche'
 import { ELENCO_ACCESSORI } from '../lib/accessori'
+import { useUtente } from '../lib/utente'
 
 interface Foto {
   id: string
@@ -43,7 +44,10 @@ export function FormAnnuncio() {
     cilindrata_cc: '',
     descrizione: '',
     stato_pubblicazione: 'bozza',
+    prezzo_acquisto: '',
+    costi_ripristino: '',
   })
+  const { isTitolare } = useUtente()
 
   const [foto, setFoto] = useState<Foto[]>([])
   const [saving, setSaving] = useState(false)
@@ -94,6 +98,8 @@ export function FormAnnuncio() {
         posti: String(data.posti ?? ''),
         cv: String(data.cv ?? ''),
         cilindrata_cc: String(data.cilindrata_cc ?? ''),
+        prezzo_acquisto: data.prezzo_acquisto == null ? '' : String(data.prezzo_acquisto),
+        costi_ripristino: data.costi_ripristino == null ? '' : String(data.costi_ripristino),
       })
       if (data.marca && !MARCHE.includes(data.marca)) {
         setMarcaAltro(true)
@@ -156,6 +162,11 @@ export function FormAnnuncio() {
       descrizione: form.descrizione || null,
       stato_pubblicazione: form.stato_pubblicazione,
       accessori: accessoriSelezionati,
+      // prezzo di acquisto e costi: li vede e li salva solo il titolare
+      ...(isTitolare && {
+        prezzo_acquisto: form.prezzo_acquisto === '' ? null : Number(form.prezzo_acquisto),
+        costi_ripristino: form.costi_ripristino === '' ? null : Number(form.costi_ripristino),
+      }),
     }
 
     const { error } = await supabase.from('annunci').update(payload).eq('id', annuncioId)
@@ -480,6 +491,33 @@ export function FormAnnuncio() {
           )}
         </div>
       </div>
+
+      {isTitolare && (
+        <div className="mt-6 rounded-xl border border-neutral-200 bg-white p-6 shadow-sm">
+          <h2 className="font-display text-lg font-bold text-neutral-900">Acquisto e margine</h2>
+          <p className="mb-4 text-xs text-neutral-500">Visibile solo al titolare. Alimenta margini e analitiche nella sezione Vendite.</p>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div>
+              <label className="field-label">Prezzo di acquisto (€)</label>
+              <input type="number" className="field" value={form.prezzo_acquisto} onChange={(e) => setForm({ ...form, prezzo_acquisto: e.target.value })} />
+            </div>
+            <div>
+              <label className="field-label">Costi di ripristino (€)</label>
+              <input type="number" className="field" value={form.costi_ripristino} onChange={(e) => setForm({ ...form, costi_ripristino: e.target.value })} />
+            </div>
+            <div>
+              <label className="field-label">Margine stimato</label>
+              <div className="field flex items-center font-bold">
+                {form.prezzo && form.prezzo_acquisto
+                  ? new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(
+                      Number(form.prezzo) - Number(form.prezzo_acquisto) - Number(form.costi_ripristino || 0)
+                    )
+                  : '-'}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="mt-6 rounded-xl border border-neutral-200 bg-white p-6 shadow-sm">
         <div className="mb-4 flex items-center justify-between">

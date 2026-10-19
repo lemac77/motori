@@ -1,14 +1,17 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Plus, Pencil, Trash2, Gauge, Calendar, ImageOff, TrendingUp, Tag, X, FileText } from 'lucide-react'
+import { Plus, Pencil, Trash2, Gauge, Calendar, ImageOff, TrendingUp, Tag, X, FileText, Receipt } from 'lucide-react'
 import { supabase } from '../lib/supabaseClient'
 import { Layout } from '../components/Layout'
+import { VenditaModal } from '../components/VenditaModal'
 
 interface Annuncio {
   id: string
   marca: string
   modello: string
   prezzo: number
+  prezzo_finale_vendita: number | null
+  venduto_il: string | null
   km: number
   immatricolazione_anno: number | null
   stato_pubblicazione: 'bozza' | 'pubblicato' | 'venduto'
@@ -35,7 +38,9 @@ export function ListaAnnunci() {
 
   // Filtri
   const [filtroMarca, setFiltroMarca] = useState('')
-  const [filtroStato, setFiltroStato] = useState('')
+  // Di default solo lo stock (bozze + pubblicati): le vendute sono nello storico
+  const [filtroStato, setFiltroStato] = useState('stock')
+  const [venditaPer, setVenditaPer] = useState<{ id: string; titolo: string } | null>(null)
   const [filtroPrezzoMin, setFiltroPrezzoMin] = useState('')
   const [filtroPrezzoMax, setFiltroPrezzoMax] = useState('')
 
@@ -48,7 +53,7 @@ export function ListaAnnunci() {
     const { data } = await supabase
       .from('annunci')
       .select(
-        'id, marca, modello, prezzo, km, immatricolazione_anno, stato_pubblicazione, annuncio_foto(url_thumbnail, ordine)'
+        'id, marca, modello, prezzo, prezzo_finale_vendita, venduto_il, km, immatricolazione_anno, stato_pubblicazione, annuncio_foto(url_thumbnail, ordine)'
       )
       .order('created_at', { ascending: false })
       .order('ordine', { foreignTable: 'annuncio_foto', ascending: true })
@@ -65,6 +70,12 @@ export function ListaAnnunci() {
 
   // Cambia stato direttamente dalla lista, senza aprire il form
   async function cambiaStato(id: string, nuovoStato: string) {
+    // "Venduto" passa dalla scheda vendita (data, prezzo, commerciale, cliente)
+    if (nuovoStato === 'venduto') {
+      const a = annunci.find((x) => x.id === id)
+      setVenditaPer({ id, titolo: a ? `${a.marca} ${a.modello}` : 'Auto' })
+      return
+    }
     setAnnunci((prev) =>
       prev.map((a) => (a.id === id ? { ...a, stato_pubblicazione: nuovoStato as Annuncio['stato_pubblicazione'] } : a))
     )
@@ -83,23 +94,25 @@ export function ListaAnnunci() {
 
   const annunciFiltrati = annunci.filter((a) => {
     if (filtroMarca && a.marca !== filtroMarca) return false
-    if (filtroStato && a.stato_pubblicazione !== filtroStato) return false
+    if (filtroStato === 'stock' && a.stato_pubblicazione === 'venduto') return false
+    if (filtroStato && filtroStato !== 'stock' && a.stato_pubblicazione !== filtroStato) return false
     if (filtroPrezzoMin && a.prezzo < Number(filtroPrezzoMin)) return false
     if (filtroPrezzoMax && a.prezzo > Number(filtroPrezzoMax)) return false
     return true
   })
 
-  const filtriAttivi = Boolean(filtroMarca || filtroStato || filtroPrezzoMin || filtroPrezzoMax)
+  const filtriAttivi = Boolean(filtroMarca || filtroStato !== 'stock' || filtroPrezzoMin || filtroPrezzoMax)
 
   function resetFiltri() {
     setFiltroMarca('')
-    setFiltroStato('')
+    setFiltroStato('stock')
     setFiltroPrezzoMin('')
     setFiltroPrezzoMax('')
   }
 
   const venduti = annunci.filter((a) => a.stato_pubblicazione === 'venduto')
-  const totaleIncassato = venduti.reduce((sum, a) => sum + Number(a.prezzo), 0)
+  const totaleIncassato = venduti.reduce((sum, a) => sum + Number(a.prezzo_finale_vendita ?? a.prezzo), 0)
+  const inStock = annunci.length - venduti.length
 
   return (
     <Layout>
@@ -107,7 +120,7 @@ export function ListaAnnunci() {
         <div>
           <h1 className="font-display text-2xl font-bold text-neutral-900">Annunci</h1>
           <p className="mt-1 text-sm text-neutral-500">
-            {annunciFiltrati.length} di {annunci.length} {annunci.length === 1 ? 'annuncio' : 'annunci'}
+            {annunciFiltrati.length} mostrati · {inStock} in stock · {venduti.length} vendute
           </p>
         </div>
         <Link to="/nuovo" className="btn-primary">
@@ -158,6 +171,7 @@ export function ListaAnnunci() {
               value={filtroStato}
               onChange={(e) => setFiltroStato(e.target.value)}
             >
+              <option value="stock">In stock</option>
               <option value="">Tutti</option>
               {STATI.map((s) => (
                 <option key={s} value={s}>
@@ -261,7 +275,12 @@ export function ListaAnnunci() {
                 </div>
 
                 <div className="flex items-center justify-between gap-4 sm:justify-end">
-                  <span className="font-display text-lg font-bold text-neutral-900">{formatPrezzo(a.prezzo)}</span>
+                  <div className="text-right">
+                    <span className="font-display text-lg font-bold text-neutral-900">{formatPrezzo(Number(a.prezzo_finale_vendita ?? a.prezzo))}</span>
+                    {a.venduto_il && (
+                      <p className="text-[11px] text-neutral-500">venduta il {new Date(a.venduto_il).toLocaleDateString('it-IT')}</p>
+                    )}
+                  </div>
                   <div className="flex items-center gap-2">
                     <Link
                       to={`/modifica/${a.id}`}
@@ -269,6 +288,15 @@ export function ListaAnnunci() {
                     >
                       <Pencil className="h-3.5 w-3.5" />
                     </Link>
+                    {a.stato_pubblicazione === 'venduto' && (
+                      <button
+                        onClick={() => setVenditaPer({ id: a.id, titolo: `${a.marca} ${a.modello}` })}
+                        title="Dati vendita"
+                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-neutral-200 text-neutral-500 transition-colors hover:border-brand hover:text-brand"
+                      >
+                        <Receipt className="h-3.5 w-3.5" />
+                      </button>
+                    )}
                     <Link
                       to={`/documenti/${a.id}`}
                       title="Documenti di vendita"
@@ -288,6 +316,17 @@ export function ListaAnnunci() {
             )
           })}
         </div>
+      )}
+      {venditaPer && (
+        <VenditaModal
+          annuncioId={venditaPer.id}
+          titolo={venditaPer.titolo}
+          onClose={() => setVenditaPer(null)}
+          onSaved={() => {
+            setVenditaPer(null)
+            load()
+          }}
+        />
       )}
     </Layout>
   )

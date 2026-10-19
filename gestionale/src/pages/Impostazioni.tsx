@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Settings } from 'lucide-react'
 import { Layout } from '../components/Layout'
+import { GestioneTeam } from '../components/GestioneTeam'
 import { leggiImpostazioni, salvaImpostazioni, type ImpostazioniGenerali } from '../lib/impostazioni'
 
 export function Impostazioni() {
@@ -145,6 +146,7 @@ export function Impostazioni() {
         </button>
         {salvato && <span className="ml-3 text-sm font-semibold text-emerald-600">Salvato</span>}
       </div>
+      <GestioneTeam />
     </Layout>
   )
 }
