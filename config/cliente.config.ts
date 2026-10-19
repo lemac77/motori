@@ -48,8 +48,10 @@ export const cliente: ClienteConfig = {
     areaServita: 'Vicenza e provincia',
   },
 
-  // Demo collegata a una landing: nessun contatto, i blocchi relativi spariscono da soli
-  contatti: {},
+  // Demo: solo email segnaposto (telefono/WhatsApp vuoti, quei bottoni restano nascosti)
+  contatti: {
+    email: 'info@bericamotori.it',
+  },
 
   orari: [
     {
