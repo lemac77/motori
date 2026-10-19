@@ -9,9 +9,8 @@ import type { ClienteConfig } from './tipi'
 export const cliente: ClienteConfig = {
   demo: true,
   demoInfo: {
-    // Da compilare quando i due progetti Vercel sono online
-    urlSito: '',
-    urlGestionale: '',
+    urlSito: 'https://motori-sito.vercel.app',
+    urlGestionale: 'https://motori-gestionale.vercel.app',
     urlLanding: '',
     // Utente da creare in Supabase > Authentication > Users
     loginEmail: 'demo@bericamotori.it',
@@ -93,7 +92,7 @@ export const cliente: ClienteConfig = {
   },
 
   sito: {
-    url: 'https://www.bericamotori.it',
+    url: 'https://motori-sito.vercel.app',
     lingua: 'it',
     locale: 'it_IT',
     titoloHome: 'Berica Motori Vicenza | Auto Usate Garantite, Nuove e Noleggio',
