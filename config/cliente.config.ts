@@ -9,10 +9,10 @@ import type { ClienteConfig } from './tipi'
 export const cliente: ClienteConfig = {
   demo: true,
   demoInfo: {
-    urlSito: 'https://sito.gestauto.studiobrillo.com',
-    urlGestionale: 'https://app.gestauto.studiobrillo.com',
+    urlSito: 'https://sito.gestauto.me',
+    urlGestionale: 'https://app.gestauto.me',
     // URL della landing GestAuto: dal login il link "Richiedile qui" porta al form demo
-    urlLanding: 'https://gestauto.studiobrillo.com',
+    urlLanding: 'https://gestauto.me',
     // Le credenziali dell'utente demo NON vanno messe qui: questo file finisce nel
     // JavaScript pubblico. Vivono solo in Supabase e nelle variabili della landing.
   },
@@ -92,7 +92,7 @@ export const cliente: ClienteConfig = {
   },
 
   sito: {
-    url: 'https://sito.gestauto.studiobrillo.com',
+    url: 'https://sito.gestauto.me',
     lingua: 'it',
     locale: 'it_IT',
     titoloHome: 'Berica Motori Vicenza | Auto Usate Garantite, Nuove e Noleggio',
