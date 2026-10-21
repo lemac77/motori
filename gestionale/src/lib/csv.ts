@@ -39,7 +39,10 @@ export function parseCsv(testo: string): string[][] {
 
 export function toCsv(righe: (string | number | null | undefined)[][]): string {
   const esc = (v: string | number | null | undefined) => {
-    const s = v == null ? '' : String(v)
+    let s = v == null ? '' : String(v)
+    // Excel esegue come formula le celle che iniziano con = + - @ (o tab/a capo): un'auto con
+    // marca "=CMD(...)" diventerebbe un attacco all'apertura del file. L'apice la rende testo.
+    if (typeof v === 'string' && /^[=+\-@\t\r]/.test(s)) s = "'" + s
     return /[;"\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s
   }
   // BOM + separatore ; : Excel italiano lo apre senza rovinare accenti e colonne
