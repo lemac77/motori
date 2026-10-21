@@ -366,7 +366,7 @@ export default function App() {
           <div className="max-w-3xl space-y-8">
             {/* Hero Logo */}
             <motion.div
-              initial={{ opacity: 0, y: -20 }}
+              initial={false}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
               className="mb-2"
@@ -381,7 +381,7 @@ export default function App() {
 
             {/* Tag/Badge */}
             <motion.div
-              initial={{ opacity: 0, x: -15 }}
+              initial={false}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6 }}
               className="inline-flex items-center gap-2 rounded-full border border-brand/30 bg-brand/10 px-4 py-1.5 text-xs font-semibold tracking-widest text-brand uppercase backdrop-blur-xs"
@@ -392,7 +392,7 @@ export default function App() {
 
             {/* Headline */}
             <motion.h1
-              initial={{ opacity: 0, y: 30 }}
+              initial={false}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.1 }}
               className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white leading-[1.05] tracking-tight uppercase"
@@ -403,7 +403,7 @@ export default function App() {
 
             {/* Subtitle */}
             <motion.p
-              initial={{ opacity: 0, y: 20 }}
+              initial={false}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
               className="text-base sm:text-lg md:text-xl text-neutral-300 leading-relaxed font-normal max-w-2xl"
@@ -415,7 +415,7 @@ export default function App() {
 
              {/* CTA Dual buttons */}
              <motion.div
-               initial={{ opacity: 0, y: 20 }}
+               initial={false}
                animate={{ opacity: 1, y: 0 }}
                transition={{ duration: 0.8, delay: 0.3 }}
                className="flex flex-col sm:flex-row gap-4 pt-4"
@@ -468,7 +468,7 @@ export default function App() {
 
             {/* Safety tag */}
             <motion.div
-              initial={{ opacity: 0 }}
+              initial={false}
               animate={{ opacity: 0.7 }}
               transition={{ duration: 0.8, delay: 0.5 }}
               className="flex items-center gap-3 text-xs text-neutral-400 font-medium"
