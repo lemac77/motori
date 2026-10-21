@@ -7,6 +7,7 @@ import { Layout } from '../components/Layout'
 import { MARCHE, MARCA_NON_IN_LISTA } from '../lib/marche'
 import { ELENCO_ACCESSORI } from '../lib/accessori'
 import { useUtente } from '../lib/utente'
+import { generaDescrizione } from '../lib/descrizione'
 
 interface Foto {
   id: string
@@ -466,7 +467,19 @@ export function FormAnnuncio() {
           </div>
 
           <div className="sm:col-span-2">
-            <label className="field-label">Descrizione</label>
+            <div className="flex items-center justify-between">
+              <label className="field-label">Descrizione</label>
+              <button
+                type="button"
+                className="mb-1 text-xs font-semibold text-brand hover:underline"
+                onClick={() => {
+                  if (form.descrizione.trim() && !confirm('Sostituire la descrizione attuale con quella generata dai dati?')) return
+                  updateField('descrizione', generaDescrizione(form, accessoriSelezionati))
+                }}
+              >
+                Genera dai dati dell'auto
+              </button>
+            </div>
             <textarea
               className="field"
               rows={5}

@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, FileText, Download, Archive, Trash2, RefreshCw } from 'lucide-react'
+import { ArrowLeft, FileText, Download, Archive, Trash2, RefreshCw, PenLine } from 'lucide-react'
 import { supabase } from '../lib/supabaseClient'
 import { Layout } from '../components/Layout'
+import { FirmaPad } from '../components/FirmaPad'
+import { impostaFirmaAcquirente } from '../lib/pdfHelpers'
 import { calcolaRataMensile } from '../lib/finanziamento'
 import { leggiImpostazioni } from '../lib/impostazioni'
 import { generaNumeroContratto } from '../lib/numeroContratto'
@@ -66,6 +68,8 @@ export function DocumentiVendita() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [generandoNumero, setGenerandoNumero] = useState(false)
+  const [firma, setFirma] = useState<string | null>(null)
+  const [padAperto, setPadAperto] = useState(false)
   const [modificaNumero, setModificaNumero] = useState(false)
   const [numeroInput, setNumeroInput] = useState('')
   const [tassoGlobale, setTassoGlobale] = useState<number>(7.9)
@@ -137,7 +141,13 @@ export function DocumentiVendita() {
       setGenerandoNumero(false)
     }
 
-    fn({ ...annuncio, numero_contratto: numero, finanziamento_tan: tassoGlobale })
+    // La firma raccolta su tablet vale solo per questa generazione e non resta in memoria dopo
+    impostaFirmaAcquirente(firma)
+    try {
+      fn({ ...annuncio, numero_contratto: numero, finanziamento_tan: tassoGlobale })
+    } finally {
+      impostaFirmaAcquirente(null)
+    }
     // L'upload in archivio parte in background e non blocca il download: ricarico
     // la lista con un piccolo ritardo per dargli il tempo di completare.
     setTimeout(() => id && caricaArchivio(id), 2500)
@@ -393,6 +403,31 @@ export function DocumentiVendita() {
           Salva prima le eventuali modifiche qui sotto, poi scarica il documento che ti serve. I campi non compilati
           appaiono vuoti sul PDF: potrai completarli a penna in sede.
         </p>
+        <div className="mb-3 flex flex-wrap items-center gap-3 rounded-lg border border-neutral-200 px-3 py-2.5">
+          <PenLine className="h-4 w-4 text-neutral-500" />
+          <div className="min-w-0 flex-1 text-xs text-neutral-600">
+            {firma ? 'Firma del cliente acquisita: comparirà nel Contratto di Vendita.' : 'Il cliente può firmare qui, sul tablet, e la firma finisce nel Contratto di Vendita.'}
+          </div>
+          {firma && <img src={firma} alt="Firma" className="h-9 rounded border border-neutral-200 bg-white px-1" />}
+          <button className="btn-secondary !py-1.5 !text-xs" onClick={() => setPadAperto(true)}>
+            {firma ? 'Rifai' : 'Raccogli firma'}
+          </button>
+          {firma && (
+            <button className="text-xs font-semibold text-neutral-500 hover:text-red-600" onClick={() => setFirma(null)}>
+              Rimuovi
+            </button>
+          )}
+        </div>
+        {padAperto && (
+          <FirmaPad
+            titolo="Firma dell'acquirente"
+            onChiudi={() => setPadAperto(false)}
+            onConferma={(png) => {
+              setFirma(png)
+              setPadAperto(false)
+            }}
+          />
+        )}
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
           <button onClick={() => generaDocumento(generaContrattoVendita, 'Contratto di Vendita')} disabled={generandoNumero} className="btn-secondary">
             <Download className="h-4 w-4" />

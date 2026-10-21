@@ -13,6 +13,7 @@ import { Vendite } from './pages/Vendite'
 import { Richieste } from './pages/Richieste'
 import { Scadenze } from './pages/Scadenze'
 import { Trattative } from './pages/Trattative'
+import { ImportaAnnunci } from './pages/ImportaAnnunci'
 import { UtenteProvider } from './lib/utente'
 
 function RequireAuth({ session, children }: { session: Session | null; children: React.ReactNode }) {
@@ -128,6 +129,14 @@ export default function App() {
           element={
             <RequireAuth session={session}>
               <Scadenze />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/importa"
+          element={
+            <RequireAuth session={session}>
+              <ImportaAnnunci />
             </RequireAuth>
           }
         />

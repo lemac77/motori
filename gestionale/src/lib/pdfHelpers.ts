@@ -815,6 +815,24 @@ export function firmaConRiquadro(ctx: DocContext, label: string, altezza = 20): 
   return { doc, y: y + altezza + 8 }
 }
 
+/** Firma raccolta su tablet: se impostata, viene stampata nel riquadro "Acquirente" dei contratti. */
+let firmaAcquirentePng: string | null = null
+export function impostaFirmaAcquirente(png: string | null) {
+  firmaAcquirentePng = png
+}
+
+export const haFirmaAcquirente = () => firmaAcquirentePng != null
+
+/** Stampa la firma raccolta sopra una riga di firma (x, y della riga, larghezza utile). */
+function stampaFirmaSuRiga(doc: jsPDF, x: number, yRiga: number, larghezza: number, altezzaMax = 11) {
+  if (!firmaAcquirentePng) return
+  const props = doc.getImageProperties(firmaAcquirentePng)
+  const sc = Math.min(larghezza / props.width, altezzaMax / props.height)
+  const w = props.width * sc
+  const h = props.height * sc
+  doc.addImage(firmaAcquirentePng, 'PNG', x, yRiga - h - 0.5, w, h)
+}
+
 /** Due riquadri firma affiancati (es. Firma Acquirente | Timbro e Firma azienda). */
 export function firmeDoppieConRiquadro(ctx: DocContext, labelSx: string, labelDx: string, altezza = 22): DocContext {
   ctx = assicuraSpazio(ctx, altezza + 10)
@@ -827,6 +845,21 @@ export function firmeDoppieConRiquadro(ctx: DocContext, labelSx: string, labelDx
   doc.setLineWidth(0.3)
   doc.rect(MARGIN, y, colWidth, altezza)
   doc.rect(MARGIN + colWidth + colGap, y, colWidth, altezza)
+
+  if (firmaAcquirentePng && /acquirente/i.test(labelSx)) {
+    // Mantiene le proporzioni della firma dentro il riquadro
+    const props = doc.getImageProperties(firmaAcquirentePng)
+    const maxW = colWidth - 6
+    const maxH = altezza - 4
+    const sc = Math.min(maxW / props.width, maxH / props.height)
+    const w = props.width * sc
+    const h = props.height * sc
+    doc.addImage(firmaAcquirentePng, 'PNG', MARGIN + (colWidth - w) / 2, y + (altezza - h) / 2, w, h)
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(6)
+    doc.setTextColor(150, 150, 150)
+    doc.text(`Firmato su tablet il ${new Date().toLocaleString('it-IT')}`, MARGIN + 2, y + altezza - 1.5)
+  }
 
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(8)
@@ -955,12 +988,14 @@ export const ALTEZZA_FIRMA_PAGINA1 = 14 // mm occupati realmente da questo blocc
 export function blocchettoFirmaPagina1(ctx: DocContext): DocContext {
   const { doc } = ctx
   let { y } = ctx
-  y += 4
+  // Con la firma su tablet il box note è più basso (vedi generaContrattoVendita): qui lascio lo spazio per la firma
+  y += haFirmaAcquirente() ? 12 : 4
 
   const colGap = 6
   const colWidth = (CONTENT_WIDTH - colGap * 2) / 3
   doc.setDrawColor(180, 180, 180)
   doc.setLineWidth(0.3)
+  stampaFirmaSuRiga(doc, MARGIN + colWidth + colGap, y, colWidth - 6)
   doc.line(MARGIN, y, MARGIN + colWidth - 6, y)
   doc.line(MARGIN + colWidth + colGap, y, MARGIN + (colWidth + colGap) + colWidth - 6, y)
   doc.line(MARGIN + (colWidth + colGap) * 2, y, MARGIN + (colWidth + colGap) * 2 + colWidth - 6, y)
@@ -985,6 +1020,7 @@ export function firmaSingolaConData(ctx: DocContext): DocContext {
   const colWidth = (CONTENT_WIDTH - colGap) / 2
   doc.setDrawColor(180, 180, 180)
   doc.setLineWidth(0.3)
+  stampaFirmaSuRiga(doc, MARGIN, y, colWidth - 10)
   doc.line(MARGIN, y, MARGIN + colWidth - 10, y)
   doc.line(MARGIN + colWidth + colGap, y, MARGIN + colWidth + colGap + colWidth - 10, y)
 

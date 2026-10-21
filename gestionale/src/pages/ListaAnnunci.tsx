@@ -1,9 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Plus, Pencil, Trash2, Gauge, Calendar, ImageOff, TrendingUp, Tag, X, FileText, Receipt } from 'lucide-react'
+import { Plus, Pencil, Trash2, Gauge, Calendar, ImageOff, TrendingUp, Tag, X, FileText, Receipt, Copy, Upload, Download, Clock, Printer } from 'lucide-react'
 import { supabase } from '../lib/supabaseClient'
 import { Layout } from '../components/Layout'
 import { VenditaModal } from '../components/VenditaModal'
+import { useUtente } from '../lib/utente'
+import { scaricaCsv } from '../lib/csv'
+import { generaCartellino } from '../lib/cartellino'
 
 interface Annuncio {
   id: string
@@ -15,8 +18,18 @@ interface Annuncio {
   km: number
   immatricolazione_anno: number | null
   stato_pubblicazione: 'bozza' | 'pubblicato' | 'venduto'
+  created_at: string
+  targa: string | null
+  alimentazione: string | null
+  cambio: string | null
+  cv: number | null
+  prezzo_acquisto: number | null
+  costi_ripristino: number | null
   annuncio_foto: { url_thumbnail: string; ordine: number }[]
 }
+
+const SOGLIA_FERMA = 60
+const giorniDa = (d: string) => Math.max(0, Math.floor((Date.now() - new Date(d).getTime()) / 86400000))
 
 const STATI = ['bozza', 'pubblicato', 'venduto'] as const
 
@@ -33,6 +46,8 @@ const STATO_LABEL: Record<string, string> = {
 }
 
 export function ListaAnnunci() {
+  const { isTitolare } = useUtente()
+  const [fermi, setFermi] = useState(false)
   const [annunci, setAnnunci] = useState<Annuncio[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -53,7 +68,7 @@ export function ListaAnnunci() {
     const { data } = await supabase
       .from('annunci')
       .select(
-        'id, marca, modello, prezzo, prezzo_finale_vendita, venduto_il, km, immatricolazione_anno, stato_pubblicazione, annuncio_foto(url_thumbnail, ordine)'
+        'id, marca, modello, prezzo, prezzo_finale_vendita, venduto_il, km, immatricolazione_anno, stato_pubblicazione, created_at, targa, alimentazione, cambio, cv, prezzo_acquisto, costi_ripristino, annuncio_foto(url_thumbnail, ordine)'
       )
       .order('created_at', { ascending: false })
       .order('ordine', { foreignTable: 'annuncio_foto', ascending: true })
@@ -66,6 +81,35 @@ export function ListaAnnunci() {
     if (!confirm('Eliminare questo annuncio? Verranno eliminate anche tutte le foto.')) return
     await supabase.from('annunci').delete().eq('id', id)
     load()
+  }
+
+  // Duplica: stessa scheda (senza foto, targa e telaio), come bozza. Utile per auto simili.
+  async function duplica(id: string) {
+    const { data } = await supabase.from('annunci').select('*').eq('id', id).single()
+    if (!data) return
+    const copia: Record<string, unknown> = { ...data }
+    for (const k of ['id', 'created_at', 'updated_at', 'targa', 'numero_telaio', 'venduto_il', 'prezzo_finale_vendita', 'commerciale_id', 'canale_vendita']) delete copia[k]
+    for (const k of Object.keys(copia)) if (k.startsWith('cliente_') || k.startsWith('permuta_')) delete copia[k]
+    copia.stato_pubblicazione = 'bozza'
+    const { data: nuova } = await supabase.from('annunci').insert(copia).select('id').single()
+    if (nuova) window.location.href = `/modifica/${nuova.id}`
+    else alert('Non sono riuscito a duplicare l’annuncio.')
+  }
+
+  async function esportaCsv() {
+    const { data } = await supabase.from('annunci').select('*').order('created_at', { ascending: false })
+    const righe = ((data as Record<string, unknown>[]) ?? []).filter((a) => filtroStato === 'stock' ? a.stato_pubblicazione !== 'venduto' : true)
+    const col: [string, string][] = [
+      ['marca', 'Marca'], ['modello', 'Modello'], ['versione', 'Versione'], ['prezzo', 'Prezzo'], ['condizione', 'Condizione'],
+      ['immatricolazione_mese', 'Mese immatricolazione'], ['immatricolazione_anno', 'Anno immatricolazione'], ['km', 'Km'],
+      ['alimentazione', 'Alimentazione'], ['cambio', 'Cambio'], ['colore', 'Colore'], ['targa', 'Targa'], ['numero_telaio', 'Telaio'],
+      ['carrozzeria', 'Carrozzeria'], ['cv', 'CV'], ['stato_pubblicazione', 'Stato'], ['venduto_il', 'Venduta il'],
+      ...(isTitolare ? ([['prezzo_acquisto', 'Prezzo acquisto'], ['costi_ripristino', 'Costi ripristino'], ['prezzo_finale_vendita', 'Prezzo finale']] as [string, string][]) : []),
+    ]
+    scaricaCsv(`parco-auto-${new Date().toISOString().slice(0, 10)}.csv`, [
+      col.map(([, l]) => l),
+      ...righe.map((r) => col.map(([k]) => r[k] as string | number | null)),
+    ])
   }
 
   // Cambia stato direttamente dalla lista, senza aprire il form
@@ -96,18 +140,20 @@ export function ListaAnnunci() {
     if (filtroMarca && a.marca !== filtroMarca) return false
     if (filtroStato === 'stock' && a.stato_pubblicazione === 'venduto') return false
     if (filtroStato && filtroStato !== 'stock' && a.stato_pubblicazione !== filtroStato) return false
+    if (fermi && (a.stato_pubblicazione === 'venduto' || giorniDa(a.created_at) < SOGLIA_FERMA)) return false
     if (filtroPrezzoMin && a.prezzo < Number(filtroPrezzoMin)) return false
     if (filtroPrezzoMax && a.prezzo > Number(filtroPrezzoMax)) return false
     return true
   })
 
-  const filtriAttivi = Boolean(filtroMarca || filtroStato !== 'stock' || filtroPrezzoMin || filtroPrezzoMax)
+  const filtriAttivi = Boolean(fermi || filtroMarca || filtroStato !== 'stock' || filtroPrezzoMin || filtroPrezzoMax)
 
   function resetFiltri() {
     setFiltroMarca('')
     setFiltroStato('stock')
     setFiltroPrezzoMin('')
     setFiltroPrezzoMax('')
+    setFermi(false)
   }
 
   const venduti = annunci.filter((a) => a.stato_pubblicazione === 'venduto')
@@ -123,10 +169,20 @@ export function ListaAnnunci() {
             {annunciFiltrati.length} mostrati · {inStock} in stock · {venduti.length} vendute
           </p>
         </div>
-        <Link to="/nuovo" className="btn-primary">
-          <Plus className="h-4 w-4" />
-          Nuovo annuncio
-        </Link>
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          <Link to="/importa" className="btn-secondary" title="Importa auto da un file Excel/CSV">
+            <Upload className="h-4 w-4" />
+            <span className="hidden sm:inline">Importa</span>
+          </Link>
+          <button onClick={esportaCsv} className="btn-secondary" title="Scarica l'elenco in CSV (apribile con Excel)">
+            <Download className="h-4 w-4" />
+            <span className="hidden sm:inline">Esporta</span>
+          </button>
+          <Link to="/nuovo" className="btn-primary">
+            <Plus className="h-4 w-4" />
+            Nuovo annuncio
+          </Link>
+        </div>
       </div>
 
       {!loading && annunci.length > 0 && (
@@ -203,6 +259,11 @@ export function ListaAnnunci() {
             />
           </div>
 
+          <label className="flex cursor-pointer items-center gap-2 self-end rounded-lg border border-neutral-200 px-3 py-2 text-xs font-semibold text-neutral-600">
+            <input type="checkbox" checked={fermi} onChange={(e) => setFermi(e.target.checked)} />
+            Ferme da {SOGLIA_FERMA}+ giorni
+          </label>
+
           {filtriAttivi && (
             <button
               onClick={resetFiltri}
@@ -270,6 +331,20 @@ export function ListaAnnunci() {
                       <span className="flex items-center gap-1">
                         <Gauge className="h-3 w-3" /> {a.km.toLocaleString('it-IT')} km
                       </span>
+                      {a.stato_pubblicazione !== 'venduto' && (() => {
+                        const g = giorniDa(a.created_at)
+                        const tono = g >= 90 ? 'text-red-600' : g >= SOGLIA_FERMA ? 'text-amber-600' : ''
+                        return (
+                          <span className={`flex items-center gap-1 ${tono}`} title="Giorni da quando l'auto è in stock">
+                            <Clock className="h-3 w-3" /> {g} {g === 1 ? 'giorno' : 'giorni'}
+                          </span>
+                        )
+                      })()}
+                      {isTitolare && a.prezzo_acquisto != null && a.stato_pubblicazione !== 'venduto' && (
+                        <span title="Margine previsto: prezzo meno acquisto e ripristino">
+                          Margine {formatPrezzo(Number(a.prezzo) - Number(a.prezzo_acquisto) - Number(a.costi_ripristino ?? 0))}
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -297,6 +372,22 @@ export function ListaAnnunci() {
                         <Receipt className="h-3.5 w-3.5" />
                       </button>
                     )}
+                    {a.stato_pubblicazione !== 'venduto' && (
+                      <button
+                        onClick={() => generaCartellino({ id: a.id, marca: a.marca, modello: a.modello, prezzo: Number(a.prezzo), km: a.km, anno: a.immatricolazione_anno, alimentazione: a.alimentazione, cambio: a.cambio, cv: a.cv, targa: a.targa })}
+                        title="Stampa il cartellino per il parabrezza (con QR)"
+                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-neutral-200 text-neutral-500 transition-colors hover:border-brand hover:text-brand"
+                      >
+                        <Printer className="h-3.5 w-3.5" />
+                      </button>
+                    )}
+                    <button
+                      onClick={() => duplica(a.id)}
+                      title="Duplica come bozza"
+                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-neutral-200 text-neutral-500 transition-colors hover:border-brand hover:text-brand"
+                    >
+                      <Copy className="h-3.5 w-3.5" />
+                    </button>
                     <Link
                       to={`/documenti/${a.id}`}
                       title="Documenti di vendita"

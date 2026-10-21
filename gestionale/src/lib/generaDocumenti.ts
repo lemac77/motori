@@ -1,4 +1,4 @@
-import { creaDocumentoTitoloSopra, creaDocumentoTitoloCompatto, sezione, righeCampi, duale, dualeCompatto, dualeQuattroColonne, paragrafo, tabellaChecklist, tabellaChecklistDueColonne, caselleCheck, righeDaCompilare, checklistSiNo, righeScadenzaBolloEIva, paginaClausoleDueColonne, firme, firmaConRiquadro, firmeDoppieConRiquadro, firmeTripleConRiquadro, schemaVeicolo, schemaVeicoloCompatto, boxNoteARighe, blocchettoFirmaPagina1, firmaSingolaConData, scarica, assicuraSpazio } from './pdfHelpers'
+import { creaDocumentoTitoloSopra, creaDocumentoTitoloCompatto, sezione, righeCampi, duale, dualeCompatto, dualeQuattroColonne, paragrafo, tabellaChecklist, tabellaChecklistDueColonne, caselleCheck, righeDaCompilare, checklistSiNo, righeScadenzaBolloEIva, paginaClausoleDueColonne, firme, firmaConRiquadro, firmeDoppieConRiquadro, firmeTripleConRiquadro, schemaVeicolo, schemaVeicoloCompatto, boxNoteARighe, blocchettoFirmaPagina1, firmaSingolaConData, haFirmaAcquirente, scarica, assicuraSpazio } from './pdfHelpers'
 import { salvaInArchivio } from './archivioDocumenti'
 import { AZIENDA } from './companyInfo'
 import { calcolaRataMensile } from './finanziamento'
@@ -263,7 +263,7 @@ export function generaContrattoVendita(a: AnnuncioDocumenti) {
 
   // Box note: altezza fissa (non più calcolata "per riempire esattamente"), sempre presente.
   // I calcoli dinamici precedenti a volte sbagliavano la stima e facevano sparire il box.
-  ctx = boxNoteARighe(ctx, 31)
+  ctx = boxNoteARighe(ctx, haFirmaAcquirente() ? 23 : 31)
   ctx = blocchettoFirmaPagina1(ctx)
 
   // =====================================================
