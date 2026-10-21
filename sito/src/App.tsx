@@ -975,6 +975,7 @@ export default function App() {
           />
         </Suspense>
       ) : currentPage === 'car-detail' ? (
+        carsLoading ? <PageLoader /> :
         <Suspense fallback={<PageLoader />}>
           <CarDetailPage
             cars={cars}
