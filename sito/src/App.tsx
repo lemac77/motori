@@ -352,13 +352,14 @@ export default function App() {
             src={heroBg}
             alt={`${RAGIONE} Showroom`}
             referrerPolicy="no-referrer"
-            className="w-full h-full object-cover object-center transform scale-105 saturate-[0.7]"
+            className="w-full h-full object-cover object-center"
+            fetchPriority="high"
+            decoding="async"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/55 to-black/20" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/35 to-transparent" />
           {/* Tono blu brand più marcato sulla foto reale (che di suo è calda/al tramonto) */}
-          <div className="absolute inset-0 bg-brand/25 mix-blend-color" />
-          <div className="absolute inset-0 bg-brand/10 mix-blend-overlay" />
+          <div className="absolute inset-0 bg-brand/15" />
         </div>
 
         {/* Content container */}
