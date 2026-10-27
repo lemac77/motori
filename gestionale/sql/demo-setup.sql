@@ -1,5 +1,5 @@
 -- =====================================================================
--- SETUP COMPLETO DATABASE (demo Autosalone Test)
+-- SETUP COMPLETO DATABASE (demo Demo GestAuto)
 -- Incolla TUTTO questo file in Supabase > SQL Editor > New query > Run.
 -- Crea: tabelle, permessi, bucket foto/documenti, numerazione contratti,
 -- auto di esempio e reset automatico ogni notte alle 03:00.
@@ -478,7 +478,7 @@ create policy "Autenticati gestiscono promemoria"
   on promemoria_fatti for all to authenticated using (true) with check (true);
 
 -- =====================================================================
--- DEMO Autosalone Test: funzione reset_demo()
+-- DEMO Demo GestAuto: funzione reset_demo()
 -- Riporta il database allo stato iniziale della demo:
 --  - 4 utenti (titolare + 3 commerciali)
 --  - 8 auto in stock (con foto statiche in /brand/auto-demo/)

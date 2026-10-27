@@ -4,7 +4,7 @@ import type { ClienteConfig } from './tipi'
  * CONFIGURAZIONE CLIENTE
  * ----------------------
  * Questo è l'unico file da compilare per un nuovo salone (più i file in /brand).
- * Valori attuali: salone DEMO "Autosalone Test", tutti i dati sono di fantasia.
+ * Valori attuali: salone DEMO "Demo GestAuto", tutti i dati sono di fantasia.
  */
 export const cliente: ClienteConfig = {
   demo: true,
@@ -18,33 +18,33 @@ export const cliente: ClienteConfig = {
   },
 
   azienda: {
-    nome: 'Autosalone Test',
-    ragioneSociale: 'Autosalone Test Srl',
+    nome: 'Demo GestAuto',
+    ragioneSociale: 'Demo GestAuto Srl',
     piva: '00000000000',
-    registroImprese: 'VI',
-    rea: 'VI-000000',
+    registroImprese: 'XX',
+    rea: 'XX-000000',
     capitaleSociale: '€ 10.000 i.v.',
     sedeLegale: {
-      via: 'Via dei Motori 12',
-      cap: '36100',
-      citta: 'Vicenza',
-      provincia: 'VI',
+      via: 'Via della Demo 1',
+      cap: '00000',
+      citta: 'Città Demo',
+      provincia: 'XX',
     },
     claim: 'Vendita auto multimarca nuove e usate',
     annoFondazione: 2012,
   },
 
   showroom: {
-    via: 'Via dei Motori 12',
-    cap: '36100',
-    citta: 'Vicenza',
-    provincia: 'VI',
-    regione: 'Veneto',
-    geoRegion: 'IT-VI',
+    via: 'Via della Demo 1',
+    cap: '00000',
+    citta: 'Città Demo',
+    provincia: 'XX',
+    regione: 'Italia',
+    geoRegion: 'IT',
     lat: 45.5455,
     lng: 11.5354,
-    queryMappa: 'Vicenza, VI',
-    areaServita: 'Vicenza e provincia',
+    queryMappa: 'Italia',
+    areaServita: 'tutta Italia',
   },
 
   // Demo: solo email segnaposto (telefono/WhatsApp vuoti, quei bottoni restano nascosti)
@@ -95,16 +95,16 @@ export const cliente: ClienteConfig = {
     url: 'https://sito.gestauto.me',
     lingua: 'it',
     locale: 'it_IT',
-    titoloHome: 'Autosalone Test Vicenza | Auto Usate Garantite, Nuove e Noleggio',
+    titoloHome: 'Demo GestAuto | Auto Usate Garantite, Nuove e Noleggio',
     descrizioneHome:
-      "Auto usate certificate, nuove e a noleggio a Vicenza. Garanzia 12 mesi inclusa, finanziamenti da 30 a 80 rate e valutazione permuta. Vieni a trovarci in showroom.",
+      "Auto usate certificate, nuove e a noleggio. Sito dimostrativo di GestAuto. Garanzia 12 mesi inclusa, finanziamenti da 30 a 80 rate e valutazione permuta. Vieni a trovarci in showroom.",
     keywords: [
-      'Autosalone Test',
-      'concessionaria Vicenza',
-      'auto usate Vicenza',
-      'auto nuove Vicenza',
-      'noleggio auto Vicenza',
-      'finanziamento auto Vicenza',
+      'Demo GestAuto',
+      'concessionaria',
+      'auto usate',
+      'auto nuove',
+      'noleggio auto',
+      'finanziamento auto',
     ],
     ogImage: '/og-image.jpg',
     ogImageWidth: 1600,
@@ -130,7 +130,7 @@ export const cliente: ClienteConfig = {
   },
 
   gestionale: {
-    titolo: 'Autosalone Test · Gestionale',
+    titolo: 'Demo GestAuto · Gestionale',
     placeholderEmail: 'nome@bericamotori.it',
   },
 }
