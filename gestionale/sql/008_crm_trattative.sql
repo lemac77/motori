@@ -47,7 +47,7 @@ drop policy if exists "Autenticati gestiscono attivita" on trattative_attivita;
 create policy "Autenticati gestiscono attivita" on trattative_attivita for all to authenticated using (true) with check (true);
 
 -- ---------------------------------------------------------------------
--- DEMO Berica Motori: trattative di esempio, con date relative a oggi.
+-- DEMO Autosalone Test: trattative di esempio, con date relative a oggi.
 -- Lanciata da reset_demo_crm() (anche dopo il reset notturno).
 -- ---------------------------------------------------------------------
 create or replace function reset_demo_crm()

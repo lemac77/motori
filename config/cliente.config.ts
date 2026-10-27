@@ -4,7 +4,7 @@ import type { ClienteConfig } from './tipi'
  * CONFIGURAZIONE CLIENTE
  * ----------------------
  * Questo è l'unico file da compilare per un nuovo salone (più i file in /brand).
- * Valori attuali: salone DEMO "Berica Motori", tutti i dati sono di fantasia.
+ * Valori attuali: salone DEMO "Autosalone Test", tutti i dati sono di fantasia.
  */
 export const cliente: ClienteConfig = {
   demo: true,
@@ -18,8 +18,8 @@ export const cliente: ClienteConfig = {
   },
 
   azienda: {
-    nome: 'Berica Motori',
-    ragioneSociale: 'Berica Motori Srl',
+    nome: 'Autosalone Test',
+    ragioneSociale: 'Autosalone Test Srl',
     piva: '00000000000',
     registroImprese: 'VI',
     rea: 'VI-000000',
@@ -95,11 +95,11 @@ export const cliente: ClienteConfig = {
     url: 'https://sito.gestauto.me',
     lingua: 'it',
     locale: 'it_IT',
-    titoloHome: 'Berica Motori Vicenza | Auto Usate Garantite, Nuove e Noleggio',
+    titoloHome: 'Autosalone Test Vicenza | Auto Usate Garantite, Nuove e Noleggio',
     descrizioneHome:
       "Auto usate certificate, nuove e a noleggio a Vicenza. Garanzia 12 mesi inclusa, finanziamenti da 30 a 80 rate e valutazione permuta. Vieni a trovarci in showroom.",
     keywords: [
-      'Berica Motori',
+      'Autosalone Test',
       'concessionaria Vicenza',
       'auto usate Vicenza',
       'auto nuove Vicenza',
@@ -130,7 +130,7 @@ export const cliente: ClienteConfig = {
   },
 
   gestionale: {
-    titolo: 'Berica Motori · Gestionale',
+    titolo: 'Autosalone Test · Gestionale',
     placeholderEmail: 'nome@bericamotori.it',
   },
 }

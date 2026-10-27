@@ -15,7 +15,7 @@ gestionale/                    <- pannello annunci + documenti PDF (React 18, Vi
 Avvio: `npm run install:all`, poi `npm run dev:sito` / `npm run dev:gestionale`.
 Ogni app vuole il suo `.env` con `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY` (vedi `.env.example`).
 
-## Demo Berica Motori (stato attuale del config)
+## Demo Autosalone Test (stato attuale del config)
 
 1. **Supabase**: SQL Editor → incolla `gestionale/sql/demo-setup.sql` → Run (tabelle, permessi, bucket, auto demo, reset notturno alle 03:00 UTC).
    Poi Authentication → Users → Add user: `demo@bericamotori.it` con una password robusta (spunta "Auto confirm"). Non scrivere la password nel repo: la landing GestAuto la manda via email a chi richiede la demo (variabile `DEMO_PASSWORD` su Vercel). Consigliato: Authentication → Sign In / Providers → disattiva "Allow new users to sign up".

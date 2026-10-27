@@ -64,7 +64,7 @@ create policy "Autenticati gestiscono promemoria"
   on promemoria_fatti for all to authenticated using (true) with check (true);
 
 -- =====================================================================
--- DEMO Berica Motori: funzione reset_demo()
+-- DEMO Autosalone Test: funzione reset_demo()
 -- Riporta il database allo stato iniziale della demo:
 --  - 4 utenti (titolare + 3 commerciali)
 --  - 8 auto in stock (con foto statiche in /brand/auto-demo/)

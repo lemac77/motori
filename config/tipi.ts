@@ -39,9 +39,9 @@ export interface ClienteConfig {
   }
 
   azienda: {
-    /** Nome commerciale che compare su sito, header, mail: "Berica Motori" */
+    /** Nome commerciale che compare su sito, header, mail: "Autosalone Test" */
     nome: string
-    /** Ragione sociale completa per contratti e footer legale: "Berica Motori Srl" */
+    /** Ragione sociale completa per contratti e footer legale: "Autosalone Test Srl" */
     ragioneSociale: string
     piva: string
     codiceFiscale?: string
